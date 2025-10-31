@@ -1,0 +1,19 @@
+name: Daily Video Rebuild
+
+on:
+  schedule:
+    # This runs at 3:00 AM UTC every day.
+    # You can change '3' to any hour (0-23).
+    - cron: '0 3 * * *'
+
+  # This line adds a button to run the job manually
+  # so you can test it right away.
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Trigger Netlify Rebuild
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Netlify Build Hook
+        run: curl -X POST -d {} ${{ secrets.https://api.netlify.com/build_hooks/6904dda9420df479f61635ed }}
