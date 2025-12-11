@@ -1,18 +1,35 @@
-name: Daily Video Rebuild
+name: Update YouTube Data
 
 on:
   schedule:
-    # This runs at 3:00 AM UTC every day.
+    # Runs at 3:00 AM UTC every day
     - cron: '0 3 * * *'
-  
-  # This line adds a button to run the job manually
+  # Allows you to click a button in GitHub to run it manually
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build:
-    name: Trigger Netlify Rebuild
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Netlify Build Hook
-        # This is the corrected line:
-        run: curl -X POST -d {} ${{ secrets.NETLIFY_BUILD_HOOK_URL }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Fetch Script
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          YOUTUBE_CHANNEL_ID: ${{ secrets.YOUTUBE_CHANNEL_ID }}
+        run: node fetch-youtube.js
+
+      - name: Commit and Push JSON
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto-update youtube-data.json"
+          file_pattern: public/youtube-data.json
